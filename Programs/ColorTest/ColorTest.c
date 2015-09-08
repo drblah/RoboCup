@@ -8,15 +8,15 @@ task main()
 
 	while(true) {
 		if(getColorHue(Color1) < 100) {
-			setMotorSpeed(LeftMotor, 30);
-			setMotorSpeed(RightMotor, 15);
+			setMotorSpeed(LeftMotor, 15);
+			setMotorSpeed(RightMotor, 20);
 		}
 		else {
-			setMotorSpeed(LeftMotor, 15);
-			setMotorSpeed(RightMotor, 30);
+			setMotorSpeed(LeftMotor, 20);
+			setMotorSpeed(RightMotor, 15);
 		}
 
-		displayBigTextLine(1, "Reflected: %d", getColorHue(Color1));
+		displayBigTextLine(1, "Hue: %d", getColorHue(Color1));
 	}
 
 }
