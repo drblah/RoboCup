@@ -17,15 +17,40 @@ float position_x = 0;
 float position_y = 0;
 float heading = 0;
 
+
 void callibColor();
+void calcDisplacement();
 
 task main()
 {
 
-	callibColor();
+	//callibColor();
 
 
 	while(true) {
+		delay(5000);
+		clearTimer(T1);
+		calcDisplacement();
+		while(getTimerValue(T1) < 1000) {
+			setMotorSpeed(LeftMotor,10);
+			setMotorSpeed(RightMotor,10);
+			calcDisplacement();
+		}
+		setMotorSpeed(LeftMotor,0);
+		setMotorSpeed(RightMotor,0);
+		delay(500);
+				clearTimer(T1);
+		calcDisplacement();
+		while(getTimerValue(T1) < 1000) {
+			setMotorSpeed(LeftMotor,-10);
+			setMotorSpeed(RightMotor,-10);
+			calcDisplacement();
+		}
+		setMotorSpeed(LeftMotor,0);
+		setMotorSpeed(RightMotor,0);
+		delay(30000);
+
+		/*
 		int reflection = getColorReflected(Color1);
 
 		if(reflection > threshold) {
@@ -40,7 +65,13 @@ task main()
 			setMotorSpeed(LeftMotor, 20);
 			setMotorSpeed(RightMotor, -20);
 		}
+		*/
 
+	}
+
+}
+
+void calcDisplacement() {
 		displacement = (getMotorEncoder(LeftMotor) + getMotorEncoder(RightMotor)) * ENCODER_SCALE_FACTOR / 2;
 		rotation = (getMotorEncoder(LeftMotor) - getMotorEncoder(RightMotor)) * ENCODER_SCALE_FACTOR/WHEELSEPARATION;
 
@@ -48,12 +79,10 @@ task main()
 		position_y = position_y + displacement * sin(heading + rotation / 2);
 		heading = heading + rotation;
 		eraseDisplay();
-		displayBigTextLine(1, "Hue: %d", reflection);
+		//displayBigTextLine(1, "Hue: %d", reflection);
 		displayBigTextLine(4, "Heading: %d", heading);
 		displayBigTextLine(6, "X: %d", position_x);
 		displayBigTextLine(8, "Y: %d", position_y);
-	}
-
 }
 
 void callibColor() {
