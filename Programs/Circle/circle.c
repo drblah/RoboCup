@@ -12,12 +12,20 @@ task main()
 	while(true) {
 			while(getMotorEncoder(LeftMotor) < 500) {
 				setMotorSpeed(LeftMotor, 50);
-				setMotorSpeed(LeftMotor, -50);
+				setMotorSpeed(RightMotor, -50);
 			}
+
+			setMotorSpeed(LeftMotor, 0);
+			setMotorSpeed(RightMotor, 0);
+			delay(1000);
 			while(getMotorEncoder(LeftMotor) > 0) {
 				setMotorSpeed(LeftMotor, -50);
-				setMotorSpeed(LeftMotor, 50);
+				setMotorSpeed(RightMotor, 50);
 			}
+
+			setMotorSpeed(LeftMotor, 0);
+			setMotorSpeed(RightMotor, 0);
+			delay(1000);
 	}
 
 
