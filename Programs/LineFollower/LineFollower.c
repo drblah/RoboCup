@@ -25,11 +25,13 @@ void calcDisplacement();
 void autoCallibColor();
 void checkIfLost(float lostTimer, bool direction);
 
+unsigned short avgReflectedLight(unsigned short samples);
+
 task main()
 {
 
-	//manualCallibColor();
-	autoCallibColor();
+	manualCallibColor();
+	//autoCallibColor();
 
 	while(true) {
 
@@ -140,18 +142,40 @@ void autoCallibColor() {
 
 }
 
+/*
+	Returns the average reflected light from a given sample size.
+*/
+unsigned short avgReflectedLight(unsigned short samples) {
+
+	unsigned int avgLight = 0;
+
+	for(unsigned short i = 0; i < samples; i++) {
+		avgLight = avgLight + getColorReflected(Color1);
+	}
+
+	avgLight = avgLight / samples;
+	return avgLight;
+}
+
 void manualCallibColor() {
 
-	short lightVal = 0;
-	short darkVal = 0;
+	unsigned short lightVal = 0;
+	unsigned short darkVal = 0;
 
 	displayBigTextLine(0, "Color callib.");
 	displayTextLine(3, "Place sensor on light surface.");
 	displayTextLine(4, "Press Enter to accept.");
 
-	while(getButtonPress(buttonEnter) != 1) {
+	while(true) {
+		// Display the reflected value live to help manual positioning.
 		lightVal = getColorReflected(Color1);
-		displayBigTextLine(6, "Hue: %d", lightVal);
+		displayBigTextLine(6, "Reflected: %d", lightVal);
+
+		// Press enter to take 10 light sampels then tage the average and break out of the loop.
+		if(getButtonPress(buttonEnter) == 1) {
+			lightVal = avgReflectedLight(10);
+			break;
+		}
 	}
 
 	delay(1000);
@@ -162,9 +186,16 @@ void manualCallibColor() {
 	displayTextLine(3, "Place sensor on dark surface.");
 	displayTextLine(4, "Press Enter to accept.");
 
-	while(getButtonPress(buttonEnter) != 1) {
+	while(true) {
+		// Display the reflected value live to help manual positioning.
 		darkVal = getColorReflected(Color1);
-		displayBigTextLine(6, "Hue: %d", darkVal);
+		displayBigTextLine(6, "Reflected: %d", darkVal);
+
+		// Press enter to take 10 light sampels then tage the average and break out of the loop.
+		if(getButtonPress(buttonEnter) == 1) {
+			darkVal = avgReflectedLight(10);
+			break;
+		}
 	}
 
 	threshold = (lightVal + darkVal) / 2;
