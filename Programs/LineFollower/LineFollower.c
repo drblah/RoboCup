@@ -17,7 +17,6 @@ float position_x = 0;
 float position_y = 0;
 float heading = 0;
 
-
 void manualCallibColor();
 void calcDisplacement();
 void autoCallibColor();
@@ -35,6 +34,7 @@ task main()
 		if(reflection > threshold) {
 			setMotorSpeed(LeftMotor, 0);
 			setMotorSpeed(RightMotor, 15);
+
 		}
 		else if(reflection >= threshold*0.90 && reflection <= threshold*1.10) {
 			setMotorSpeed(LeftMotor, 20);
