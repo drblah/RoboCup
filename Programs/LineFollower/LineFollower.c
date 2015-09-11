@@ -8,6 +8,9 @@
 #define ENCODER_COUNT_REVOLUTION 360 // How many encoder counts goes to one revolution
 #define ENCODER_SCALE_FACTOR ((PI*WHEELSIZE)/360)
 #define WHEELSEPARATION 15 // Distance between wheels in cm
+#define TURN_RIGHT true
+#define TURN_LEFT false
+
 
 short threshold = 0;
 
@@ -20,6 +23,7 @@ float heading = 0;
 void manualCallibColor();
 void calcDisplacement();
 void autoCallibColor();
+void checkIfLost(float lostTimer, bool direction);
 
 task main()
 {
@@ -31,23 +35,65 @@ task main()
 
 		int reflection = getColorReflected(Color1);
 
-		if(reflection > threshold) {
+		clearTimer(timer1);
+		/*
+			If the current reflected light is brighter than the callibrated threshold
+			the robot assumes that it is currently in the light area. Thus it will begin
+			moving towards the dark area by turning slightly to the left.
+		*/
+		while(reflection > threshold) {
 			setMotorSpeed(LeftMotor, 0);
 			setMotorSpeed(RightMotor, 15);
+			reflection = getColorReflected(Color1);
+
+			checkIfLost(getTimerValue(timer1), TURN_LEFT);
 
 		}
-		else if(reflection >= threshold*0.90 && reflection <= threshold*1.10) {
+
+		clearTimer(timer1);
+
+		while(reflection >= threshold*0.90 && reflection <= threshold*1.10) {
 			setMotorSpeed(LeftMotor, 20);
 			setMotorSpeed(RightMotor, 20);
+			reflection = getColorReflected(Color1);
 			delay(100);
 		}
-		else {
+
+		clearTimer(timer1);
+
+		while(reflection < threshold) {
 			setMotorSpeed(LeftMotor, 15);
 			setMotorSpeed(RightMotor, 0);
+			reflection = getColorReflected(Color1);
+
+			checkIfLost(getTimerValue(timer1), TURN_RIGHT);
 		}
 
 	}
 
+}
+/*
+	Checks if the robot has been turning for more than 1500 ms.
+	If that is the case, then the robot will enter a stationary search mode,
+	where it will turn on the spot in an attempt to find a color contrast.
+*/
+void checkIfLost(float lostTimer, bool direction) {
+	while(lostTimer > 1500) {
+		if(direction == TURN_LEFT) {
+			setMotorSpeed(LeftMotor, -10);
+			setMotorSpeed(RightMotor, 10);
+		}
+		else {
+			setMotorSpeed(LeftMotor, 10);
+			setMotorSpeed(RightMotor, -10);
+		}
+		int reflection = getColorReflected(Color1);
+
+		if(reflection < threshold) {
+			break;
+			clearTimer(timer1);
+		}
+	}
 }
 
 void calcDisplacement() {
