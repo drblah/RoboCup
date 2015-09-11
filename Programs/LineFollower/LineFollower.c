@@ -18,54 +18,33 @@ float position_y = 0;
 float heading = 0;
 
 
-void callibColor();
+void manualCallibColor();
 void calcDisplacement();
+void autoCallibColor();
 
 task main()
 {
 
-	//callibColor();
-
+	//manualCallibColor();
+	autoCallibColor();
 
 	while(true) {
-		delay(5000);
-		clearTimer(T1);
-		calcDisplacement();
-		while(getTimerValue(T1) < 1000) {
-			setMotorSpeed(LeftMotor,10);
-			setMotorSpeed(RightMotor,10);
-			calcDisplacement();
-		}
-		setMotorSpeed(LeftMotor,0);
-		setMotorSpeed(RightMotor,0);
-		delay(500);
-				clearTimer(T1);
-		calcDisplacement();
-		while(getTimerValue(T1) < 1000) {
-			setMotorSpeed(LeftMotor,-10);
-			setMotorSpeed(RightMotor,-10);
-			calcDisplacement();
-		}
-		setMotorSpeed(LeftMotor,0);
-		setMotorSpeed(RightMotor,0);
-		delay(30000);
 
-		/*
 		int reflection = getColorReflected(Color1);
 
 		if(reflection > threshold) {
-			setMotorSpeed(LeftMotor, -20);
-			setMotorSpeed(RightMotor, 20);
+			setMotorSpeed(LeftMotor, 0);
+			setMotorSpeed(RightMotor, 15);
 		}
 		else if(reflection >= threshold*0.90 && reflection <= threshold*1.10) {
-			setMotorSpeed(LeftMotor, 40);
-			setMotorSpeed(RightMotor, 40);
+			setMotorSpeed(LeftMotor, 20);
+			setMotorSpeed(RightMotor, 20);
+			delay(100);
 		}
 		else {
-			setMotorSpeed(LeftMotor, 20);
-			setMotorSpeed(RightMotor, -20);
+			setMotorSpeed(LeftMotor, 15);
+			setMotorSpeed(RightMotor, 0);
 		}
-		*/
 
 	}
 
@@ -85,7 +64,37 @@ void calcDisplacement() {
 		displayBigTextLine(8, "Y: %d", position_y);
 }
 
-void callibColor() {
+void autoCallibColor() {
+	unsigned short lightVal = 0;
+	unsigned short darkVal = 255;
+
+	while(getButtonPress(buttonEnter) != 1) {
+		displayBigTextLine(2, "Press Enter to Calib");
+	}
+
+	clearTimer(timer1);
+	setMotorSpeed(LeftMotor, 25);
+	setMotorSpeed(RightMotor, 5);
+
+	while(getTimerValue(timer1) < 1000) {
+		unsigned short reflection = getColorReflected(Color1);
+
+		if(reflection > lightVal) {
+			lightVal = reflection;
+		}
+		if(reflection < darkVal) {
+			darkVal = reflection;
+		}
+	}
+
+	setMotorSpeed(LeftMotor, 0);
+	setMotorSpeed(RightMotor, 0);
+
+	threshold = (lightVal + darkVal) / 2;
+
+}
+
+void manualCallibColor() {
 
 	short lightVal = 0;
 	short darkVal = 0;
