@@ -7,7 +7,14 @@
 #define WHEELSIZE 7 // Wheel diameter in cm
 #define ENCODER_COUNT_REVOLUTION 360 // How many encoder counts goes to one revolution
 #define ENCODER_SCALE_FACTOR ((PI*WHEELSIZE)/360)
-#define WHEELSEPARATION 15 // Distance between wheels in cm
+#define WHEELSEPARATION 15.0 // Distance between wheels in cm
+#define TURN_RIGHT true
+#define TURN_LEFT false
+
+#define DISPLAYX 178
+#define DISPLAYY 128
+#define DISPCENTERX DISPLAYX/2
+#define DISPCENTERY DISPLAYY/2
 
 short threshold = 0;
 
@@ -17,37 +24,89 @@ float position_x = 0;
 float position_y = 0;
 float heading = 0;
 
+float gyroHeading = 0;
+
 void manualCallibColor();
 void calcDisplacement();
 void autoCallibColor();
+void checkIfLost(float lostTimer, bool direction);
+float circleCoordsX(int a, int radius, float t);
+float circleCoordsY(int b, int radius, float t);
+
+unsigned short avgReflectedLight(unsigned short samples);
 
 task main()
 {
 
-	//manualCallibColor();
-	autoCallibColor();
-
+	manualCallibColor();
+	//autoCallibColor();
+	eraseDisplay();
 	while(true) {
+		displayBigTextLine(0, "X: %f", position_x);
+		displayBigTextLine(3, "Y: %f", position_y);
 
 		int reflection = getColorReflected(Color1);
+		gyroHeading = getGyroDegrees(Gyro);
+		calcDisplacement();
 
-		if(reflection > threshold) {
+		clearTimer(timer1);
+		/*
+			If the current reflected light is brighter than the callibrated threshold
+			the robot assumes that it is currently in the light area. Thus it will begin
+			moving towards the dark area by turning slightly to the left.
+		*/
+		while(reflection > threshold) {
 			setMotorSpeed(LeftMotor, 0);
 			setMotorSpeed(RightMotor, 15);
+			reflection = getColorReflected(Color1);
 
+			checkIfLost(getTimerValue(timer1), TURN_LEFT);
 		}
-		else if(reflection >= threshold*0.90 && reflection <= threshold*1.10) {
+
+		clearTimer(timer1);
+
+		while(reflection >= threshold*0.90 && reflection <= threshold*1.10) {
 			setMotorSpeed(LeftMotor, 20);
 			setMotorSpeed(RightMotor, 20);
+			reflection = getColorReflected(Color1);
 			delay(100);
 		}
-		else {
+
+		clearTimer(timer1);
+
+		while(reflection < threshold) {
 			setMotorSpeed(LeftMotor, 15);
 			setMotorSpeed(RightMotor, 0);
+			reflection = getColorReflected(Color1);
+
+			checkIfLost(getTimerValue(timer1), TURN_RIGHT);
 		}
 
 	}
 
+}
+/*
+	Checks if the robot has been turning for more than 1500 ms.
+	If that is the case, then the robot will enter a stationary search mode,
+	where it will turn on the spot in an attempt to find a color contrast.
+*/
+void checkIfLost(float lostTimer, bool direction) {
+	while(lostTimer > 1500) {
+		if(direction == TURN_LEFT) {
+			setMotorSpeed(LeftMotor, -10);
+			setMotorSpeed(RightMotor, 10);
+		}
+		else {
+			setMotorSpeed(LeftMotor, 10);
+			setMotorSpeed(RightMotor, -10);
+		}
+		int reflection = getColorReflected(Color1);
+
+		if(reflection < threshold) {
+			break;
+			clearTimer(timer1);
+		}
+	}
 }
 
 void calcDisplacement() {
@@ -56,7 +115,7 @@ void calcDisplacement() {
 
 		position_x = position_x + displacement * cos(heading + rotation / 2);
 		position_y = position_y + displacement * sin(heading + rotation / 2);
-		heading = heading + rotation;
+		heading = getGyroHeading(Gyro);
 		eraseDisplay();
 		//displayBigTextLine(1, "Hue: %d", reflection);
 		displayBigTextLine(4, "Heading: %d", heading);
@@ -94,18 +153,39 @@ void autoCallibColor() {
 
 }
 
+/*
+	Returns the average reflected light from a given sample size.
+*/
+unsigned short avgReflectedLight(unsigned short samples) {
+
+	unsigned int avgLight = 0;
+
+	for(unsigned short i = 0; i < samples; i++) {
+		avgLight = avgLight + getColorReflected(Color1);
+	}
+
+	avgLight = avgLight / samples;
+	return avgLight;
+}
+
 void manualCallibColor() {
 
-	short lightVal = 0;
-	short darkVal = 0;
+	unsigned short lightVal = 0;
+	unsigned short darkVal = 0;
 
 	displayBigTextLine(0, "Color callib.");
 	displayTextLine(3, "Place sensor on light surface.");
 	displayTextLine(4, "Press Enter to accept.");
-
-	while(getButtonPress(buttonEnter) != 1) {
+	while(true) {
+		// Display the reflected value live to help manual positioning.
 		lightVal = getColorReflected(Color1);
-		displayBigTextLine(6, "Hue: %d", lightVal);
+		displayBigTextLine(6, "Reflected: %d", lightVal);
+
+		// Press enter to take 10 light sampels then tage the average and break out of the loop.
+		if(getButtonPress(buttonEnter) == 1) {
+			lightVal = avgReflectedLight(10);
+			break;
+		}
 	}
 
 	delay(1000);
@@ -116,10 +196,25 @@ void manualCallibColor() {
 	displayTextLine(3, "Place sensor on dark surface.");
 	displayTextLine(4, "Press Enter to accept.");
 
-	while(getButtonPress(buttonEnter) != 1) {
+	while(true) {
+		// Display the reflected value live to help manual positioning.
 		darkVal = getColorReflected(Color1);
-		displayBigTextLine(6, "Hue: %d", darkVal);
+		displayBigTextLine(6, "Reflected: %d", darkVal);
+
+		// Press enter to take 10 light sampels then tage the average and break out of the loop.
+		if(getButtonPress(buttonEnter) == 1) {
+			darkVal = avgReflectedLight(10);
+			break;
+		}
 	}
 
 	threshold = (lightVal + darkVal) / 2;
+}
+
+float circleCoordsX(int a,int radius, float t) {
+	return a+radius*cos(t);
+}
+
+float circleCoordsY(int b, int radius, float t) {
+	return b+radius*sin(t);
 }
