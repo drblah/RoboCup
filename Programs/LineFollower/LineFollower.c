@@ -7,10 +7,14 @@
 #define WHEELSIZE 7 // Wheel diameter in cm
 #define ENCODER_COUNT_REVOLUTION 360 // How many encoder counts goes to one revolution
 #define ENCODER_SCALE_FACTOR ((PI*WHEELSIZE)/360)
-#define WHEELSEPARATION 15 // Distance between wheels in cm
+#define WHEELSEPARATION 15.0 // Distance between wheels in cm
 #define TURN_RIGHT true
 #define TURN_LEFT false
 
+#define DISPLAYX 178
+#define DISPLAYY 128
+#define DISPCENTERX DISPLAYX/2
+#define DISPCENTERY DISPLAYY/2
 
 short threshold = 0;
 
@@ -20,10 +24,14 @@ float position_x = 0;
 float position_y = 0;
 float heading = 0;
 
+float gyroHeading = 0;
+
 void manualCallibColor();
 void calcDisplacement();
 void autoCallibColor();
 void checkIfLost(float lostTimer, bool direction);
+float circleCoordsX(int a, int radius, float t);
+float circleCoordsY(int b, int radius, float t);
 
 unsigned short avgReflectedLight(unsigned short samples);
 
@@ -32,10 +40,14 @@ task main()
 
 	manualCallibColor();
 	//autoCallibColor();
-
+	eraseDisplay();
 	while(true) {
+		displayBigTextLine(0, "X: %f", position_x);
+		displayBigTextLine(3, "Y: %f", position_y);
 
 		int reflection = getColorReflected(Color1);
+		gyroHeading = getGyroDegrees(Gyro);
+		calcDisplacement();
 
 		clearTimer(timer1);
 		/*
@@ -49,7 +61,6 @@ task main()
 			reflection = getColorReflected(Color1);
 
 			checkIfLost(getTimerValue(timer1), TURN_LEFT);
-
 		}
 
 		clearTimer(timer1);
@@ -104,7 +115,7 @@ void calcDisplacement() {
 
 		position_x = position_x + displacement * cos(heading + rotation / 2);
 		position_y = position_y + displacement * sin(heading + rotation / 2);
-		heading = heading + rotation;
+		heading = getGyroHeading(Gyro);
 		eraseDisplay();
 		//displayBigTextLine(1, "Hue: %d", reflection);
 		displayBigTextLine(4, "Heading: %d", heading);
@@ -165,7 +176,6 @@ void manualCallibColor() {
 	displayBigTextLine(0, "Color callib.");
 	displayTextLine(3, "Place sensor on light surface.");
 	displayTextLine(4, "Press Enter to accept.");
-
 	while(true) {
 		// Display the reflected value live to help manual positioning.
 		lightVal = getColorReflected(Color1);
@@ -199,4 +209,12 @@ void manualCallibColor() {
 	}
 
 	threshold = (lightVal + darkVal) / 2;
+}
+
+float circleCoordsX(int a,int radius, float t) {
+	return a+radius*cos(t);
+}
+
+float circleCoordsY(int b, int radius, float t) {
+	return b+radius*sin(t);
 }
