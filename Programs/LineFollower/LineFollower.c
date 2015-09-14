@@ -95,6 +95,7 @@ task main()
 			setMotorSpeed(RightMotor, 15);
 			clearTimer(timer1);
 			while(getTimerValue(timer1) < 1000) {}
+			reflection = getColorReflected(Color1);
 			while(reflection < threshold && reflection > stopLine) {
 				reflection = getColorReflected(Color1);
 			}
