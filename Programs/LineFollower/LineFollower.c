@@ -17,6 +17,9 @@
 #define DISPCENTERY DISPLAYY/2
 
 short threshold = 0;
+short stopLine = 0;
+
+short stopLineCounts = 0;
 
 float displacement = 0;
 float rotation = 0;
@@ -30,8 +33,11 @@ void manualCallibColor();
 void calcDisplacement();
 void autoCallibColor();
 void checkIfLost(float lostTimer, bool direction);
+void rotate(int degrees);
 float circleCoordsX(int a, int radius, float t);
 float circleCoordsY(int b, int radius, float t);
+
+
 
 unsigned short avgReflectedLight(unsigned short samples);
 
@@ -74,7 +80,7 @@ task main()
 
 		clearTimer(timer1);
 
-		while(reflection < threshold) {
+		while(reflection < threshold && reflection > stopLine) {
 			setMotorSpeed(LeftMotor, 15);
 			setMotorSpeed(RightMotor, 0);
 			reflection = getColorReflected(Color1);
@@ -82,6 +88,18 @@ task main()
 			checkIfLost(getTimerValue(timer1), TURN_RIGHT);
 		}
 
+		if(reflection <= stopLine){
+			stopLineCounts++;
+			rotate(45);
+			setMotorSpeed(LeftMotor, 15);
+			setMotorSpeed(RightMotor, 15);
+			clearTimer(timer1);
+			while(getTimerValue(timer1) < 1000) {}
+			while(reflection < threshold && reflection > stopLine) {
+				reflection = getColorReflected(Color1);
+			}
+
+		}
 	}
 
 }
@@ -174,8 +192,8 @@ unsigned short avgReflectedLight(unsigned short samples) {
 void manualCallibColor() {
 
 	unsigned short lightVal = 0;
+	unsigned short greyVal = 0;
 	unsigned short darkVal = 0;
-
 	displayBigTextLine(0, "Color callib.");
 	displayTextLine(3, "Place sensor on light surface.");
 	displayTextLine(4, "Press Enter to accept.");
@@ -196,9 +214,26 @@ void manualCallibColor() {
 	eraseDisplay();
 
 	displayBigTextLine(0, "Color callib.");
-	displayTextLine(3, "Place sensor on dark surface.");
+	displayTextLine(3, "Place sensor on grey surface.");
 	displayTextLine(4, "Press Enter to accept.");
 
+	while(true) {
+		// Display the reflected value live to help manual positioning.
+		greyVal = getColorReflected(Color1);
+		displayBigTextLine(6, "Reflected: %d", greyVal);
+
+		// Press enter to take 10 light sampels then tage the average and break out of the loop.
+		if(getButtonPress(buttonEnter) == 1) {
+			greyVal = avgReflectedLight(10);
+			break;
+		}
+	}
+
+	delay(1000);
+
+	displayBigTextLine(0, "Color callib.");
+	displayTextLine(3, "Place sensor on dark surface.");
+	displayTextLine(4, "Press Enter to accept.");
 	while(true) {
 		// Display the reflected value live to help manual positioning.
 		darkVal = getColorReflected(Color1);
@@ -210,8 +245,10 @@ void manualCallibColor() {
 			break;
 		}
 	}
+		delay(5000);
 
-	threshold = (lightVal + darkVal) / 2;
+	threshold = (lightVal + greyVal) / 2;
+	stopLine = darkVal;
 }
 
 float circleCoordsX(int a,int radius, float t) {
@@ -220,4 +257,21 @@ float circleCoordsX(int a,int radius, float t) {
 
 float circleCoordsY(int b, int radius, float t) {
 	return b+radius*sin(t);
+}
+void rotate(int degrees){
+	resetGyro(Gyro);
+
+
+	if(degrees > 0){
+		setMotorSpeed(LeftMotor,10);
+		setMotorSpeed(RightMotor,-10);
+		}
+	else {
+		setMotorSpeed(LeftMotor,-10);
+		setMotorSpeed(RightMotor,10);
+		}
+	while(abs(getGyroDegrees(Gyro)) <= abs(degrees)){
+	}
+	setMotorSpeed(LeftMotor,0);
+	setMotorSpeed(RightMotor,0);
 }
