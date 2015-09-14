@@ -35,9 +35,9 @@ float circleCoordsY(int b, int radius, float t);
 
 unsigned short avgReflectedLight(unsigned short samples);
 
+
 task main()
 {
-
 	manualCallibColor();
 	//autoCallibColor();
 	eraseDisplay();
@@ -112,6 +112,9 @@ void checkIfLost(float lostTimer, bool direction) {
 void calcDisplacement() {
 		displacement = (getMotorEncoder(LeftMotor) + getMotorEncoder(RightMotor)) * ENCODER_SCALE_FACTOR / 2;
 		rotation = (getMotorEncoder(LeftMotor) - getMotorEncoder(RightMotor)) * ENCODER_SCALE_FACTOR/WHEELSEPARATION;
+
+		resetMotorEncoder(LeftMotor);
+		resetMotorEncoder(LeftMotor);
 
 		position_x = position_x + displacement * cos(heading + rotation / 2);
 		position_y = position_y + displacement * sin(heading + rotation / 2);
