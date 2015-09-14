@@ -34,6 +34,7 @@ void calcDisplacement();
 void autoCallibColor();
 void checkIfLost(float lostTimer, bool direction);
 void rotate(int degrees);
+void mission1(int degrees);
 float circleCoordsX(int a, int radius, float t);
 float circleCoordsY(int b, int radius, float t);
 
@@ -90,16 +91,15 @@ task main()
 
 		if(reflection <= stopLine){
 			stopLineCounts++;
-			rotate(45);
-			setMotorSpeed(LeftMotor, 15);
-			setMotorSpeed(RightMotor, 15);
-			clearTimer(timer1);
-			while(getTimerValue(timer1) < 1000) {}
-			reflection = getColorReflected(Color1);
-			while(reflection < threshold && reflection > stopLine) {
-				reflection = getColorReflected(Color1);
-			}
+			switch(stopLineCounts) {
+			case 1:
+				mission1(30);
+			break;
 
+			case 2:
+				mission1(-30);
+			break;
+			}
 		}
 	}
 
@@ -276,3 +276,26 @@ void rotate(int degrees){
 	setMotorSpeed(LeftMotor,0);
 	setMotorSpeed(RightMotor,0);
 }
+	void mission1(int degrees){
+		rotate(degrees);
+		setMotorSpeed(LeftMotor, 15);
+		setMotorSpeed(RightMotor, 15);
+		clearTimer(timer1);
+		while(getTimerValue(timer1) < 1000) {}
+
+		// Move forward until the grey line is detected again.
+		while(true) {
+			int reflected = getColorReflected(Color1);
+			if(reflected <= threshold && reflected > stopLine) {
+				break;
+			}
+		}
+		// Seek opposite edge of line
+		while(true) {
+			int reflected = getColorReflected(Color1);
+			if(reflected > threshold) {
+				break;
+			}
+		}
+
+	}
