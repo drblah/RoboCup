@@ -11,6 +11,10 @@
 #define TURN_RIGHT true
 #define TURN_LEFT false
 
+//Different robot moods
+#define CONFIDENT 0
+#define CONFUSED 1
+
 #define DISPLAYX 178
 #define DISPLAYY 128
 #define DISPCENTERX DISPLAYX/2
@@ -18,6 +22,7 @@
 
 short threshold = 0;
 short stopLine = 0;
+short robotMood = 1;
 
 short stopLineCounts = 0;
 
@@ -37,15 +42,34 @@ void rotate(int degrees);
 void mission1(int degrees);
 float circleCoordsX(int a, int radius, float t);
 float circleCoordsY(int b, int radius, float t);
-
-
-
 unsigned short avgReflectedLight(unsigned short samples);
 
+task playMusic() {
+	setSoundVolume(100);
+	while(true) {
+		switch(robotMood) {
+		case CONFIDENT:
+			playSoundFile("/home/root/lms2012/prjs/rc/airlinesLoop");
+			delay(2141);
+		break;
+
+		case CONFUSED:
+			playSoundFile("/home/root/lms2012/prjs/rc/oh-oh");
+			delay(2500);
+		break;
+		}
+	}
+
+
+
+}
 
 task main()
 {
+	robotMood = CONFUSED;
+	startTask(playMusic);
 	manualCallibColor();
+	robotMood = CONFIDENT;
 	//autoCallibColor();
 	eraseDisplay();
 	while(true) {
@@ -104,6 +128,9 @@ task main()
 	}
 
 }
+
+
+
 /*
 	Checks if the robot has been turning for more than 1500 ms.
 	If that is the case, then the robot will enter a stationary search mode,
@@ -111,6 +138,7 @@ task main()
 */
 void checkIfLost(float lostTimer, bool direction) {
 	while(lostTimer > 1500) {
+		robotMood = CONFUSED;
 		if(direction == TURN_LEFT) {
 			setMotorSpeed(LeftMotor, -10);
 			setMotorSpeed(RightMotor, 10);
@@ -124,6 +152,7 @@ void checkIfLost(float lostTimer, bool direction) {
 		if(reflection < threshold) {
 			break;
 			clearTimer(timer1);
+			robotMood = CONFIDENT;
 		}
 	}
 }
