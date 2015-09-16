@@ -88,7 +88,7 @@ task main()
 		*/
 		while(reflection > threshold) {
 			setMotorSpeed(LeftMotor, 0);
-			setMotorSpeed(RightMotor, 15);
+			setMotorSpeed(RightMotor, 10);
 			reflection = getColorReflected(Color1);
 
 			checkIfLost(getTimerValue(timer1), TURN_LEFT);
@@ -106,7 +106,7 @@ task main()
 		clearTimer(timer1);
 
 		while(reflection < threshold && reflection > stopLine) {
-			setMotorSpeed(LeftMotor, 15);
+			setMotorSpeed(LeftMotor, 10);
 			setMotorSpeed(RightMotor, 0);
 			reflection = getColorReflected(Color1);
 
@@ -150,9 +150,9 @@ void checkIfLost(float lostTimer, bool direction) {
 		int reflection = getColorReflected(Color1);
 
 		if(reflection < threshold) {
-			break;
-			clearTimer(timer1);
 			robotMood = CONFIDENT;
+			clearTimer(timer1);
+			break;
 		}
 	}
 }
