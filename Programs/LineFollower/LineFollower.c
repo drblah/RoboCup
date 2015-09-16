@@ -22,7 +22,7 @@
 
 short threshold = 0;
 short stopLine = 0;
-short robotMood = 1;
+volatile short robotMood = 1;
 
 short stopLineCounts = 0;
 
@@ -87,8 +87,8 @@ task main()
 			moving towards the dark area by turning slightly to the left.
 		*/
 		while(reflection > threshold) {
-			setMotorSpeed(LeftMotor, 0);
-			setMotorSpeed(RightMotor, 10);
+			setMotorSpeed(LeftMotor, 20);
+			setMotorSpeed(RightMotor, 40);
 			reflection = getColorReflected(Color1);
 
 			checkIfLost(getTimerValue(timer1), TURN_LEFT);
@@ -97,17 +97,16 @@ task main()
 		clearTimer(timer1);
 
 		while(reflection >= threshold*0.90 && reflection <= threshold*1.10) {
-			setMotorSpeed(LeftMotor, 20);
-			setMotorSpeed(RightMotor, 20);
+			setMotorSpeed(LeftMotor, 40);
+			setMotorSpeed(RightMotor, 40);
 			reflection = getColorReflected(Color1);
-			delay(100);
 		}
 
 		clearTimer(timer1);
 
 		while(reflection < threshold && reflection > stopLine) {
-			setMotorSpeed(LeftMotor, 10);
-			setMotorSpeed(RightMotor, 0);
+			setMotorSpeed(LeftMotor, 40);
+			setMotorSpeed(RightMotor, 20);
 			reflection = getColorReflected(Color1);
 
 			checkIfLost(getTimerValue(timer1), TURN_RIGHT);
