@@ -4,7 +4,7 @@
 task main()
 {
 	while(true) {
-		displayBigTextLine(0, "%d" , getColorHue(Color1));
+		displayBigTextLine(0, "%d" , getColorAmbient(Color1));
 	}
 
 }
