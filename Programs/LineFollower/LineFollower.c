@@ -39,7 +39,8 @@ void calcDisplacement();
 void autoCallibColor();
 void checkIfLost(float lostTimer, bool direction);
 void rotate(int degrees);
-void mission1(int degrees);
+void mission1(int degrees, int delayMS);
+void mission6();
 float circleCoordsX(int a, int radius, float t);
 float circleCoordsY(int b, int radius, float t);
 unsigned short avgReflectedLight(unsigned short samples);
@@ -111,7 +112,7 @@ task main()
 
 			checkIfLost(getTimerValue(timer1), TURN_RIGHT);
 		}
-
+		// Mission selector
 		if(reflection <= stopLine){
 			stopLineCounts++;
 			switch(stopLineCounts) {
@@ -121,6 +122,10 @@ task main()
 
 			case 2:
 				mission1(-30,1000);
+			break;
+
+			case 6:
+				mission6();
 			break;
 			}
 		}
@@ -287,6 +292,7 @@ float circleCoordsX(int a,int radius, float t) {
 float circleCoordsY(int b, int radius, float t) {
 	return b+radius*sin(t);
 }
+
 void rotate(int degrees){
 	resetGyro(Gyro);
 
@@ -304,12 +310,12 @@ void rotate(int degrees){
 	setMotorSpeed(LeftMotor,0);
 	setMotorSpeed(RightMotor,0);
 }
-void mission1(int degrees,int delay) {
+
+void mission1(int degrees,int delayMS) {
 	rotate(degrees);
 	setMotorSpeed(LeftMotor, 15);
 	setMotorSpeed(RightMotor, 15);
-	delay(delay);
-}
+	delay(delayMS);
 
 		// Move forward until the grey line is detected again.
 		while(true) {
@@ -326,4 +332,9 @@ void mission1(int degrees,int delay) {
 			}
 		}
 
-	}
+}
+
+void mission6() {
+	mission1(-30, 200);
+	mission1(0, 200);
+}
