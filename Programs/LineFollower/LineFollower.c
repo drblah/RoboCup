@@ -116,11 +116,11 @@ task main()
 			stopLineCounts++;
 			switch(stopLineCounts) {
 			case 1:
-				mission1(30);
+				mission1(30,1000);
 			break;
 
 			case 2:
-				mission1(-30);
+				mission1(-30,1000);
 			break;
 			}
 		}
@@ -304,12 +304,12 @@ void rotate(int degrees){
 	setMotorSpeed(LeftMotor,0);
 	setMotorSpeed(RightMotor,0);
 }
-	void mission1(int degrees){
-		rotate(degrees);
-		setMotorSpeed(LeftMotor, 15);
-		setMotorSpeed(RightMotor, 15);
-		clearTimer(timer1);
-		while(getTimerValue(timer1) < 1000) {}
+void mission1(int degrees,int delay) {
+	rotate(degrees);
+	setMotorSpeed(LeftMotor, 15);
+	setMotorSpeed(RightMotor, 15);
+	delay(delay);
+}
 
 		// Move forward until the grey line is detected again.
 		while(true) {
