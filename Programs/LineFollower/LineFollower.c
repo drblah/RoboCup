@@ -61,8 +61,6 @@ task playMusic() {
 		}
 	}
 
-
-
 }
 
 task main()
@@ -74,12 +72,9 @@ task main()
 	//autoCallibColor();
 	eraseDisplay();
 	while(true) {
-		displayBigTextLine(0, "X: %f", position_x);
-		displayBigTextLine(3, "Y: %f", position_y);
 
 		int reflection = getColorReflected(Color1);
 		gyroHeading = getGyroDegrees(Gyro);
-		calcDisplacement();
 
 		clearTimer(timer1);
 		/*
