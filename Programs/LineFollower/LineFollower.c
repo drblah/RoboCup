@@ -22,9 +22,12 @@
 
 short threshold = 0;
 short stopLine = 0;
+short stopLineCounts = 0; // Must start at 0
+bool stopLineLock = false;
+
 volatile short robotMood = 1;
 
-short stopLineCounts = 0;
+
 
 float displacement = 0;
 float rotation = 0;
@@ -40,7 +43,10 @@ void autoCallibColor();
 void checkIfLost(float lostTimer, bool direction);
 void rotate(int degrees);
 void mission1(int degrees, int delayMS);
-void mission6();
+void mission2(int degrees, int delayMS);
+void mission5();
+void mission7();
+void mission8();
 float circleCoordsX(int a, int radius, float t);
 float circleCoordsY(int b, int radius, float t);
 unsigned short avgReflectedLight(unsigned short samples);
@@ -83,8 +89,9 @@ task main()
 			moving towards the dark area by turning slightly to the left.
 		*/
 		while(reflection > threshold) {
-			setMotorSpeed(LeftMotor, 20);
-			setMotorSpeed(RightMotor, 40);
+			stopLineLock = false;
+			setMotorSpeed(LeftMotor, 10);
+			setMotorSpeed(RightMotor, 20);
 			reflection = getColorReflected(Color1);
 
 			checkIfLost(getTimerValue(timer1), TURN_LEFT);
@@ -93,22 +100,25 @@ task main()
 		clearTimer(timer1);
 
 		while(reflection >= threshold*0.90 && reflection <= threshold*1.10) {
-			setMotorSpeed(LeftMotor, 40);
-			setMotorSpeed(RightMotor, 40);
+			stopLineLock = false;
+			setMotorSpeed(LeftMotor, 20);
+			setMotorSpeed(RightMotor, 20);
 			reflection = getColorReflected(Color1);
 		}
 
 		clearTimer(timer1);
 
 		while(reflection < threshold && reflection > stopLine) {
-			setMotorSpeed(LeftMotor, 40);
-			setMotorSpeed(RightMotor, 20);
+			stopLineLock = false;
+			setMotorSpeed(LeftMotor, 20);
+			setMotorSpeed(RightMotor, 10);
 			reflection = getColorReflected(Color1);
 
 			checkIfLost(getTimerValue(timer1), TURN_RIGHT);
 		}
 		// Mission selector
-		if(reflection <= stopLine){
+		if(reflection <= stopLine && stopLineLock == false){
+			stopLineLock = true;
 			stopLineCounts++;
 			switch(stopLineCounts) {
 			case 1:
@@ -116,11 +126,19 @@ task main()
 			break;
 
 			case 2:
-				mission1(-30,1000);
+				mission2(-30,1000);
 			break;
 
-			case 6:
-				mission6();
+			case 5:
+				mission5();
+			break;
+
+			case 7:
+				mission7();
+			break;
+
+			case 8:
+				mission8();
 			break;
 			}
 		}
@@ -136,7 +154,7 @@ task main()
 	where it will turn on the spot in an attempt to find a color contrast.
 */
 void checkIfLost(float lostTimer, bool direction) {
-	while(lostTimer > 1500) {
+	while(lostTimer > 1000) {
 		robotMood = CONFUSED;
 		if(direction == TURN_LEFT) {
 			setMotorSpeed(LeftMotor, -10);
@@ -148,7 +166,12 @@ void checkIfLost(float lostTimer, bool direction) {
 		}
 		int reflection = getColorReflected(Color1);
 
-		if(reflection < threshold) {
+		if(reflection < threshold && TURN_LEFT) {
+			robotMood = CONFIDENT;
+			clearTimer(timer1);
+			break;
+		}
+		else if (reflection > threshold && TURN_RIGHT) {
 			robotMood = CONFIDENT;
 			clearTimer(timer1);
 			break;
@@ -328,8 +351,35 @@ void mission1(int degrees,int delayMS) {
 		}
 
 }
+void mission2(int degrees,int delayMS) {
+	rotate(degrees);
+	setMotorSpeed(LeftMotor, 15);
+	setMotorSpeed(RightMotor, 15);
+	delay(delayMS);
 
-void mission6() {
-	mission1(-30, 200);
-	mission1(0, 200);
+		// Move forward until the grey line is detected again.
+		while(true) {
+			int reflected = getColorReflected(Color1);
+			if(reflected <= threshold && reflected > stopLine) {
+				break;
+			}
+		}
+}
+
+void mission5() {
+	mission1(-20, 1000);
+	mission1(10, 500);
+}
+
+void mission7() {
+	rotate(45);
+	setMotorSpeed(LeftMotor, 15);
+	setMotorSpeed(RightMotor, 15);
+	delay(2000);
+	mission2(-45, 0);
+}
+
+void mission8() {
+
+
 }
