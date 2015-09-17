@@ -22,7 +22,7 @@
 
 short threshold = 0;
 short stopLine = 0;
-short stopLineCounts = 7; // Must start at 0
+short stopLineCounts = 6; // Must start at 0
 bool stopLineLock = false;
 
 volatile short robotMood = 1;
@@ -30,10 +30,10 @@ volatile short robotMood = 1;
 float gyroHeading = 0;
 
 void manualCallibColor();
-void calcDisplacement();
 void autoCallibColor();
 void checkIfLost(float lostTimer, bool direction);
 void rotate(int degrees);
+void moveDist(int dist, int speed);
 void mission1(int degrees, int delayMS);
 void mission2(int degrees, int delayMS);
 void mission5();
@@ -64,6 +64,7 @@ task playMusic() {
 
 task main()
 {
+	mission8();
 	robotMood = CONFUSED;
 	startTask(playMusic);
 	manualCallibColor();
@@ -309,6 +310,33 @@ float calcDistMoved() {
 	return ((PI*WHEELDIAMETER)/ENCODER_COUNT_REVOLUTION) * (getMotorEncoder(LeftMotor)+getMotorEncoder(RightMotor))/2;
 }
 
+void moveDist(int dist, int speed) {
+	resetMotorEncoder(LeftMotor);
+	resetMotorEncoder(RightMotor);
+	if(dist > 0) {
+		while(calcDistMoved() < dist) {
+			setMotorSpeed(LeftMotor, speed);
+			setMotorSpeed(RightMotor, speed);
+		}
+
+		setMotorSpeed(LeftMotor, 0);
+		setMotorSpeed(RightMotor, 0);
+	}
+	else {
+		setMotorSpeed(LeftMotor, speed*-1);
+		setMotorSpeed(RightMotor, speed*-1);
+
+		while(calcDistMoved() > dist) {
+			setMotorSpeed(LeftMotor, speed);
+			setMotorSpeed(RightMotor, speed);
+		}
+
+		setMotorSpeed(LeftMotor, 0);
+		setMotorSpeed(RightMotor, 0);
+	}
+
+}
+
 void mission1(int degrees,int delayMS) {
 	rotate(degrees);
 	setMotorSpeed(LeftMotor, 15);
@@ -353,14 +381,17 @@ void mission5() {
 
 void mission7() {
 	rotate(45);
-	setMotorSpeed(LeftMotor, 15);
-	setMotorSpeed(RightMotor, 15);
-	delay(2000);
+	moveDist(40, 15);
 	mission2(-45, 0);
 }
 
 void mission8() {
-	rotate(45);
-	setMotorSpeed(LeftMotor, 10);
-	setMotorSpeed(RightMotor, 10);
+	moveDist(40, 15);
+	rotate(-30);
+
+	moveDist(30, 15);
+	rotate(55);
+	moveDist(50, 15);
+
+	mission2(-65, 50);
 }
