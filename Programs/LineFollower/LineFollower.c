@@ -6,8 +6,6 @@
 
 #define WHEELDIAMETER 7 // Wheel diameter in cm
 #define ENCODER_COUNT_REVOLUTION 360 // How many encoder counts goes to one revolution
-#define ENCODER_SCALE_FACTOR ((PI*WHEELSIZE)/360)
-#define WHEELSEPARATION 15.0 // Distance between wheels in cm
 #define TURN_RIGHT true
 #define TURN_LEFT false
 
@@ -22,7 +20,7 @@
 
 short threshold = 0;
 short stopLine = 0;
-short stopLineCounts = 6; // Must start at 0
+short stopLineCounts = 0; // Must start at 0
 bool stopLineLock = false;
 
 volatile short robotMood = 1;
@@ -64,7 +62,7 @@ task playMusic() {
 
 task main()
 {
-	mission8();
+
 	robotMood = CONFUSED;
 	startTask(playMusic);
 	manualCallibColor();
