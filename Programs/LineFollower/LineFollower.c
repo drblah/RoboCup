@@ -381,18 +381,17 @@ void mission5() {
 }
 
 void mission7() {
-	rotate(45);
+	rotate(55);
 	moveDist(40, 15);
 	mission2(-45, 0);
 }
 
 void mission8() {
-	moveDist(40, 15);
-	rotate(-30);
+	rotate(-80);
+	mission2(0,500);
+	while(true){
+		setMotorSpeed(LeftMotor,0);
+		setMotorSpeed(RightMotor,0);
+	}
 
-	moveDist(30, 15);
-	rotate(55);
-	moveDist(50, 15);
-
-	mission2(-65, 50);
 }
