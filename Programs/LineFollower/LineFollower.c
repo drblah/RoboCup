@@ -51,6 +51,7 @@ task playMusic() {
 	setSoundVolume(100);
 	while(true) {
 		switch(robotMood) {
+
 		case CONFIDENT:
 			playSoundFile("/home/root/lms2012/prjs/rc/airlinesLoop");
 			delay(2141);
@@ -60,6 +61,7 @@ task playMusic() {
 			playSoundFile("/home/root/lms2012/prjs/rc/oh-oh");
 			delay(2500);
 		break;
+
 		case FINISH: playSoundFile("/home/root/lms2012/prjs/rc/tarm");
 			delay(2558);
 		break;
@@ -122,11 +124,12 @@ task main(){
 			stopLineCounts++;
 			switch(stopLineCounts) {
 			case 1:
-				mission1(30,1000);
+				mission1(30,1300);
 			break;
 
 			case 2:
-				mission2(-30,1000);
+				moveDist(25, 15);
+				mission2(310,1300);
 			break;
 
 			case 5:
@@ -381,8 +384,8 @@ void mission2(int degrees,int delayMS) {
 }
 
 void mission5() {
-	moveDist(20,15);
-	mission1(-70,300);
+	moveDist(10,15);
+	mission1(-60,600);
 	mission1(10,500);
 }
 
