@@ -27,6 +27,7 @@ volatile short robotMood = 1;
 
 float gyroHeading = 0;
 
+// Prototypes
 void manualCallibColor();
 void autoCallibColor();
 void checkIfLost(float lostTimer, bool direction);
@@ -108,6 +109,7 @@ task main()
 
 			checkIfLost(getTimerValue(timer1), TURN_RIGHT);
 		}
+
 		// Mission selector
 		if(reflection <= stopLine && stopLineLock == false){
 			stopLineLock = true;
@@ -289,7 +291,6 @@ float circleCoordsY(int b, int radius, float t) {
 void rotate(int degrees){
 	resetGyro(Gyro);
 
-
 	if(degrees > 0){
 		setMotorSpeed(LeftMotor,10);
 		setMotorSpeed(RightMotor,-10);
@@ -357,6 +358,7 @@ void mission1(int degrees,int delayMS) {
 		}
 
 }
+
 void mission2(int degrees,int delayMS) {
 	rotate(degrees);
 	setMotorSpeed(LeftMotor, 15);
