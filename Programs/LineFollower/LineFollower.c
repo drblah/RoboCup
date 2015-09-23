@@ -393,14 +393,12 @@ void mission7() {
 }
 
 void mission8() {
-	rotate(-80);
-	mission2(0,500);
+	mission1(-65,500);
 	while(true){
 		setMotorSpeed(LeftMotor,0);
 		setMotorSpeed(RightMotor,0);
 		robotMood=FINISH;
 	}
-
 }
 
 void mission9(){
