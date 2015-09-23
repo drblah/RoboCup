@@ -373,8 +373,9 @@ void mission2(int degrees,int delayMS) {
 }
 
 void mission5() {
-	mission1(-20, 1000);
-	mission1(10, 500);
+	moveDist(20,15);
+	mission1(-70,300);
+	mission1(10,500);
 }
 
 void mission7() {
